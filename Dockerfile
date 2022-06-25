@@ -4,44 +4,44 @@ FROM gazebo:libgazebo9-bionic
 
 # WORKDIR /
 # add ROS sources
-# RUN apt update && apt install -y openssh-server x11-apps mesa-utils vim llvm-dev sudo autoconf
-# RUN apt-get install -y libtool libtool-bin build-essential
-# RUN mkdir /var/run/sshd
-# RUN echo 'root:aquila' | chpasswd
-# RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-# RUN grep "^X11UseLocalhost" /etc/ssh/sshd_config || echo "X11UseLocalhost no" >> /etc/ssh/sshd_config
+RUN apt update && apt install -y openssh-server x11-apps mesa-utils vim llvm-dev sudo autoconf
+RUN apt-get install -y libtool libtool-bin build-essential
+RUN mkdir /var/run/sshd
+RUN echo 'root:aquila' | chpasswd
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN grep "^X11UseLocalhost" /etc/ssh/sshd_config || echo "X11UseLocalhost no" >> /etc/ssh/sshd_config
 
-# # SSH login fix. Otherwise user is kicked off after login
-# RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+# SSH login fix. Otherwise user is kicked off after login
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
-# #Rebuild MESA with llvmpipe (from https://turbovnc.org/Documentation/Mesa)
-# RUN wget ftp://ftp.freedesktop.org/pub/mesa/mesa-18.3.1.tar.gz
-# RUN tar -zxvf mesa-18.3.1.tar.gz
-# RUN rm mesa-18.3.1.tar.gz
-# WORKDIR /mesa-18.3.1
-# RUN autoreconf -fiv
-# RUN ./configure --enable-glx=gallium-xlib --disable-dri --disable-egl --disable-gbm --with-gallium-drivers=swrast --prefix=$HOME/mesa
-# RUN make install
+#Rebuild MESA with llvmpipe (from https://turbovnc.org/Documentation/Mesa)
+RUN wget ftp://ftp.freedesktop.org/pub/mesa/mesa-18.3.1.tar.gz
+RUN tar -zxvf mesa-18.3.1.tar.gz
+RUN rm mesa-18.3.1.tar.gz
+WORKDIR /mesa-18.3.1
+RUN autoreconf -fiv
+RUN ./configure --enable-glx=gallium-xlib --disable-dri --disable-egl --disable-gbm --with-gallium-drivers=swrast --prefix=$HOME/mesa
+RUN make install
 
-# #set up locales
-# RUN apt install -y locales screen
-# RUN locale-gen en_GB.UTF-8 && locale-gen en_US.UTF-8
+#set up locales
+RUN apt install -y locales screen
+RUN locale-gen en_GB.UTF-8 && locale-gen en_US.UTF-8
 
-# #INSTALL ADDITIONAL ROS PACKAGES BELOW HERE
+#INSTALL ADDITIONAL ROS PACKAGES BELOW HERE
 
-# #clear apt caches to reduce image size
-# RUN rm -rf /var/lib/apt/lists/*
+#clear apt caches to reduce image size
+RUN rm -rf /var/lib/apt/lists/*
 
-# #configure system to use new mesa
-# WORKDIR /
-# RUN echo "export LD_LIBRARY_PATH=/root/mesa/lib" > opengl.sh
+#configure system to use new mesa
+WORKDIR /
+RUN echo "export LD_LIBRARY_PATH=/root/mesa/lib" > opengl.sh
 
-# ENV NOTVISIBLE "in users profile"
-# RUN echo "export VISIBLE=now" >> /etc/profile
+ENV NOTVISIBLE "in users profile"
+RUN echo "export VISIBLE=now" >> /etc/profile
 
-# # Start and expose the SSH service
-# EXPOSE 22
-# RUN service ssh restart
+# Start and expose the SSH service
+EXPOSE 22
+RUN service ssh restart
 
 WORKDIR /
 RUN apt update && apt install -y \
